@@ -1,94 +1,67 @@
-document.querySelectorAll(".plan-learn-more-container").forEach((container) => {
-  const trigger = container.querySelector(".learn-more-trigger");
-  const tooltip = container.querySelector(".plan-tooltip");
+document.addEventListener("DOMContentLoaded", () => {
+  console.log(
+    "Number of .plan-learn-more-container elements found:",
+    document.querySelectorAll(".plan-learn-more-container").length
+  );
 
-  // Show tooltip
-  const showTooltip = () => {
-    tooltip.setAttribute("aria-hidden", "false");
-    tooltip.style.opacity = "1";
-    tooltip.style.transform = "scale(1)";
-  };
+  document
+    .querySelectorAll(".plan-learn-more-container")
+    .forEach((container) => {
+      const trigger = container.querySelector(".learn-more-trigger");
+      const tooltip = container.querySelector(".plan-tooltip");
 
-  // Hide tooltip
-  const hideTooltip = () => {
-    tooltip.setAttribute("aria-hidden", "true");
-    tooltip.style.opacity = "0";
-    tooltip.style.transform = "scale(0.9)";
-  };
+      // Position tooltip so top-right corner is fixed at (23, 4)
+      const updateTooltipPosition = () => {
+        if (!tooltip) return;
 
-  trigger.addEventListener("mouseenter", showTooltip);
-  trigger.addEventListener("focus", showTooltip);
+        const tooltipWidth = tooltip.offsetWidth;
+        const fixedRightX = 23; // Right edge X of tooltip (px)
+        const fixedTopY = 4; // Top edge Y of tooltip (px)
 
-  trigger.addEventListener("mouseleave", hideTooltip);
-  trigger.addEventListener("blur", hideTooltip);
-});
-document.querySelectorAll(".plan-learn-more-container").forEach((container) => {
-  const trigger = container.querySelector(".learn-more-trigger");
-  const tooltip = container.querySelector(".plan-tooltip");
+        // Calculate left so that tooltip's right edge ends at fixedRightX
+        const left = fixedRightX - tooltipWidth;
 
-  // Reference elements for positioning
-  const leftPinkBox = document.querySelector(".nb-left");
-  const glassBox = document.querySelector(".glass-box-floating-wrapper");
-  const greenBoxes = document.querySelector(".green-subtitle-container");
+        tooltip.style.position = "fixed";
+        tooltip.style.top = `${fixedTopY}px`;
+        tooltip.style.left = `${left}px`;
+        tooltip.style.right = "auto";
+        tooltip.style.bottom = "auto";
+        tooltip.style.maxWidth = "300px";
+        tooltip.style.zIndex = 1000;
 
-  // ✅ Define this function OUTSIDE of showTooltip
-  const updateTooltipPosition = () => {
-    if (!leftPinkBox || !glassBox || !greenBoxes) {
-      console.log("One or more required elements missing:", {
-        leftPinkBox,
-        glassBox,
-        greenBoxes,
+        console.log(
+          `Tooltip anchored top-right at x=${fixedRightX}, y=${fixedTopY}. Left=${left}, Width=${tooltipWidth}`
+        );
+      };
+
+      const showTooltip = () => {
+        console.log("showTooltip triggered for:", trigger);
+        updateTooltipPosition();
+        tooltip.setAttribute("aria-hidden", "false");
+        tooltip.style.opacity = "1";
+        tooltip.style.transform = "scale(1)";
+        tooltip.style.pointerEvents = "auto";
+      };
+
+      const hideTooltip = () => {
+        console.log("hideTooltip triggered for:", trigger);
+        tooltip.setAttribute("aria-hidden", "true");
+        tooltip.style.opacity = "0";
+        tooltip.style.transform = "scale(0.9)";
+        tooltip.style.pointerEvents = "none";
+      };
+
+      // Attach event listeners for mouse and keyboard
+      trigger.addEventListener("mouseenter", showTooltip);
+      trigger.addEventListener("focus", showTooltip);
+      trigger.addEventListener("mouseleave", hideTooltip);
+      trigger.addEventListener("blur", hideTooltip);
+
+      // Adjust tooltip position on window resize if visible
+      window.addEventListener("resize", () => {
+        if (tooltip.getAttribute("aria-hidden") === "false") {
+          updateTooltipPosition();
+        }
       });
-      return;
-    }
-
-    const leftBoxRect = leftPinkBox.getBoundingClientRect();
-    const left = leftBoxRect.left + leftBoxRect.width + 10;
-
-    const glassRect = glassBox.getBoundingClientRect();
-    const greenRect = greenBoxes.getBoundingClientRect();
-    // Add scrollY to convert viewport coords to page coords
-    const verticalCenter =
-      window.scrollY + (glassRect.top + greenRect.bottom) / 2;
-    tooltip.style.top = `${verticalCenter - tooltipHeight / 2}px`;
-
-    const tooltipHeight = tooltip.offsetHeight;
-
-    console.log("Calculated tooltip position:", {
-      left,
-      verticalCenter,
-      tooltipHeight,
-      top: verticalCenter - tooltipHeight / 2,
     });
-
-    tooltip.style.left = `${left}px`;
-    tooltip.style.top = `${verticalCenter - tooltipHeight / 2}px`;
-  };
-
-  // 👇 This uses the function
-  const showTooltip = () => {
-    updateTooltipPosition();
-    tooltip.setAttribute("aria-hidden", "false");
-    tooltip.style.opacity = "1";
-    tooltip.style.transform = "scale(1)";
-  };
-
-  const hideTooltip = () => {
-    tooltip.setAttribute("aria-hidden", "true");
-    tooltip.style.opacity = "0";
-    tooltip.style.transform = "scale(0.9)";
-  };
-
-  // Event listeners
-  trigger.addEventListener("mouseenter", showTooltip);
-  trigger.addEventListener("focus", showTooltip);
-  trigger.addEventListener("mouseleave", hideTooltip);
-  trigger.addEventListener("blur", hideTooltip);
-
-  // Reposition tooltip on window resize
-  window.addEventListener("resize", () => {
-    if (tooltip.getAttribute("aria-hidden") === "false") {
-      updateTooltipPosition();
-    }
-  });
 });
